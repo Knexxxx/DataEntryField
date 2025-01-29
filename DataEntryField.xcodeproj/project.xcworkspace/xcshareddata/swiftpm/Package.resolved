@@ -1,0 +1,15 @@
+{
+  "originHash" : "a4833db74767a980214b103bdd0e655b048cf745758fe3288f09390f2dc13c58",
+  "pins" : [
+    {
+      "identity" : "swiftrichstring",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/malcommac/SwiftRichString.git",
+      "state" : {
+        "revision" : "9bf4b5af6bb4386865636fc504d6c588c2b65040",
+        "version" : "3.7.2"
+      }
+    }
+  ],
+  "version" : 3
+}

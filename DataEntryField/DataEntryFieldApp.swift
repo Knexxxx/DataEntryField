@@ -1,10 +1,3 @@
-//
-//  DataEntryFieldApp.swift
-//  DataEntryField
-//
-//  Created by Andreas on 25.01.25.
-//
-
 import SwiftUI
 
 @main
