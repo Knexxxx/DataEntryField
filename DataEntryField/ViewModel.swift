@@ -7,6 +7,7 @@ class ViewModel: ObservableObject {
     @Published var drafttext: String = "" // Example property
     @Published var dataEntryState: DataEntryStates = .UNUSED
     @Published var cursorPos: Int = 0
+//    @Published var location: CGPoint = CGPoint()
     var maxChar: Int = 4
     
     func GetMaxChars(_maxchar: Int)
