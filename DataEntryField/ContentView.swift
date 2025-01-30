@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = ViewModel()
+    @StateObject private var viewModel = ViewModelDataEntry()
     @State var location:CGPoint = CGPoint(x:0.35, y:0.14)
     @State var opacity:CGFloat = 0
     @State var scale:CGFloat = 1.0
@@ -121,7 +121,7 @@ struct ContentView: View {
                 Text("Drag to set pointer size & opacity")
                     .padding(.top, -20)
 
-                Text("x: \(location.x), y: \(location.y)")
+                Text("PointerPos: x:\(Int(location.x * 100))% , y:\(Int(location.y * 100))%")
                 //        Text("x: \(convertLocation(geometry.size.width, geometry.size.height).x)")
                 
             }
