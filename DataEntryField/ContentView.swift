@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = ViewModel()
-    @State var location:CGPoint = CGPoint(x:0, y:0)
+    @State var location:CGPoint = CGPoint(x:0.35, y:0.14)
     @State var opacity:CGFloat = 0
     @State var scale:CGFloat = 1.0
     var body: some View {
@@ -107,12 +107,20 @@ struct ContentView: View {
                     }
                 }
                 TrackpadView(location:$location).padding(10).foregroundColor(.gray)
-                    .frame(width:70,height:70)
+                    .frame(width:150,height:80)
+                Text("Drag to move pointer")
+                    .padding(.top, -20)
+
+            Divider()
+                    .frame(height:10)
+
                 
                 TrackpadView(location:locationConverterProxy).padding(10).foregroundColor(.gray)
                     .frame(width:50,height:50)
                 
-                
+                Text("Drag to set pointer size & opacity")
+                    .padding(.top, -20)
+
                 Text("x: \(location.x), y: \(location.y)")
                 //        Text("x: \(convertLocation(geometry.size.width, geometry.size.height).x)")
                 
