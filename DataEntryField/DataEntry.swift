@@ -1,80 +1,82 @@
 import SwiftUI
 
 struct DataEntry: View {
+    @Bindable var database: DatabaseUserData
+    // The editing view model (still injected via the environment).
     @Environment(DataEntryViewModel.self) var viewModel
+    // The external database model that holds the saved text.
+    
     @State private var isVisible = true // Toggle for blinking
     @Binding var cursorPos: Int
+    /// The key path to the property on DatabaseUserData that contains the saved text.
     let refKeyPath: ReferenceWritableKeyPath<DatabaseUserData, String>
     @Binding var drafttext: String
-//    @State private var drafttextlocal: String = ""
     let maxChars: Int
-    @Binding var savedtext: String
-    @State private var blinkingTask: Task<Void, Never>? // Store the blinking task
+    @State private var blinkingTask: Task<Void, Never>? // For managing the blinking animation
     
+    /// Computes the saved text by reading from the databaseUserData using the provided key path.
+    var savedText: String {
+        database[keyPath: refKeyPath]
+    }
+    
+    func updateDatabase(with newValue: String) {
+        database[keyPath: refKeyPath] = newValue // Writes the value
+    }
     
     var strokeColor: Color {
         switch viewModel.dataEntryState {
-        case .UNUSED:
-            return .green
-        case .EDIT:
-            return .red
-        case .HIGHLIGHT:
-            return .yellow
+        case .UNUSED:    return .green
+        case .EDIT:      return .red
+        case .HIGHLIGHT: return .yellow
         }
     }
     
     var body: some View {
+        // Use @Bindable to automatically update when viewModel changes.
         @Bindable var vm = viewModel
         HStack {
             ZStack(alignment: vm.dataEntryState == .EDIT ? .leading : .center) {
-                // Background and state-dependent text
+                // Display content depending on the editing state.
                 if vm.dataEntryState == .UNUSED {
-                    Text(savedtext)
-                        .lineLimit(1) // Prevents line wrapping
-                        .foregroundColor(.cyan) // Text color
-                        .frame(maxWidth: .infinity, alignment: .center) // Centered text
-//                        .background(Color.green.opacity(0.3)) // Outer background
+                    // Display the saved text from the database (via the key path).
+                    Text(savedText)
+                        .lineLimit(1)
+                        .foregroundColor(.cyan)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .cornerRadius(2)
                 } else if vm.dataEntryState == .HIGHLIGHT {
                     Text(highlight(text: drafttext))
-                        .lineLimit(1) // Prevents line wrapping
-                        .foregroundColor(.black) // Text color
-                        .frame(maxWidth: .infinity, alignment: .center) // Align text to the left
-                    //                        .background(Color.cyan)
+                        .lineLimit(1)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .cornerRadius(2)
                 } else if vm.dataEntryState == .EDIT {
+                    // Display the draft text and a blinking cursor.
                     Text(drafttext)
-                        .lineLimit(1) // Prevents line wrapping
-                        .frame(maxWidth: .infinity, alignment: .leading) // Align cursor text to the left
-                        .foregroundColor(.red) // Text color
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.red)
                     Text(draftWithCursor(exp: drafttext, cursorPos: cursorPos, isVisible: isVisible))
-                        .lineLimit(1) // Prevents line wrapping
-                        .frame(maxWidth: .infinity, alignment: .leading) // Align cursor text to the left
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .onAppear {
                             cursorPos = drafttext.count
-                            print("enabling blinking task at \(cursorPos)")
+                            print("Enabling blinking task at \(cursorPos)")
                             viewModel.GetMaxChars(_maxchar: maxChars)
-                            // Cancel any existing blinking task
-                            blinkingTask?.cancel()
-                            // Start a new blinking task
+                            blinkingTask?.cancel() // Cancel any existing task.
                             blinkingTask = Task {
                                 while !Task.isCancelled {
-                                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.8 seconds
-                                    await MainActor.run {
-                                        isVisible.toggle()
-                                    }
+                                    try? await Task.sleep(nanoseconds: 500_000_000)
+                                    await MainActor.run { isVisible.toggle() }
                                 }
                             }
-                            
                         }
                         .onDisappear {
-                            print("canceling blinking task")
+                            print("Canceling blinking task")
                             blinkingTask?.cancel()
                             blinkingTask = nil
                             isVisible = true
                         }
-                    
-                    
                 }
             }
         }
@@ -91,55 +93,48 @@ struct DataEntry: View {
     }
 }
 
+// MARK: - Helper Functions
 
 func draftWithCursor(exp: String, cursorPos: Int, isVisible: Bool) -> AttributedString {
-    // Validate the cursor position
     guard cursorPos >= 0 && cursorPos <= exp.count else {
-        print("warning: cursor out of bounds")
-        return AttributedString(exp) // Return original string if out of bounds
+        print("Warning: cursor out of bounds")
+        return AttributedString(exp)
     }
-    // Create attributed string components
     var beforeCursor = AttributedString(String(exp.prefix(cursorPos)))
-    beforeCursor.foregroundColor = .cyan
+    // For demonstration, we set the text before the cursor to clear.
     beforeCursor.foregroundColor = .clear
-//    var afterCursor = AttributedString(String(exp.suffix(exp.count - cursorPos)))
-//    afterCursor.foregroundColor = .cyan
-    
-    // Create the cursor part
     var cursor = AttributedString(isVisible ? "▌" : " ")
     cursor.foregroundColor = Color.cyan.opacity(0.5)
-    
-    // Combine all parts
     var result = beforeCursor
     result += cursor
-//    result += afterCursor
-    
     return result
 }
 
-
 private func highlight(text: String) -> AttributedString {
     var attributedString = AttributedString(text.isEmpty ? "   " : text)
-    attributedString.foregroundColor = .black  // Set text color to black
-    attributedString.backgroundColor = .cyan   // Set background color to cyan
+    attributedString.foregroundColor = .black
+    attributedString.backgroundColor = .cyan
     return attributedString
 }
 
 // MARK: - Preview
-struct DataEntry_Previews: PreviewProvider {
-    @State private static var viewModel = DataEntryViewModel()
-    @Binding var drafttext: String
-    @State private static var savedText = "SavedText"
-    @State private static var state = DataEntryStates.UNUSED
-    
-    static var previews: some View {
-        DataEntry(
-            cursorPos: $viewModel.cursorPos,
-            refKeyPath: \DatabaseUserData.data,
-            drafttext: $savedText,
-            maxChars: 20,
-            savedtext: $savedText        )
-        .environment(viewModel)
 
-    }
-}
+//struct DataEntry_Previews: PreviewProvider {
+//    @State private static var viewModel = DataEntryViewModel()
+//    @State private static var drafttext = "Draft text"
+//    @State private static var cursorPos = 0
+//    @StateObject private static var databaseUserData = DatabaseUserData()
+//    
+//    static var previews: some View {
+//        DataEntry(
+//            cursorPos: $cursorPos,
+//            refKeyPath: \DatabaseUserData.data,
+//            drafttext: $drafttext,
+//            maxChars: 20
+//        )
+//        .environment(viewModel)
+//        .environmentObject(databaseUserData)
+//        .padding()
+//        .previewLayout(.sizeThatFits)
+//    }
+//}

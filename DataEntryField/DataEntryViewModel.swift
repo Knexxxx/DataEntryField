@@ -9,14 +9,20 @@ class DataEntryViewModel {
     var cursorPos: Int = 0
 //    @Published var location: CGPoint = CGPoint()
     var maxChar: Int = 4
+    // Reference to the environment instance
+    var databaseUserData: DatabaseUserData?
+    
+    init(databaseUserData: DatabaseUserData? = nil) {
+            self.databaseUserData = databaseUserData
+        }
+    
+    
     
     func GetMaxChars(_maxchar: Int)
     {
         maxChar = _maxchar
     }
 
-    
-    
     func tapReceived() {
         switch dataEntryState {
         case .UNUSED:
@@ -63,7 +69,12 @@ class DataEntryViewModel {
         if key == "VALIDATE" && dataEntryState != .UNUSED
         {
             print("VALIDATED")
-            data = drafttext
+            // ✅ Save value to DatabaseUserData instance
+           databaseUserData?.data = drafttext
+           print("Saved to DatabaseUserData: \(drafttext)")
+            
+            
+          /*  data = drafttext*/ //TODO: implement saving drafttext to Database
             dataEntryState = .UNUSED
         }
         if key == "ESC" && dataEntryState != .UNUSED

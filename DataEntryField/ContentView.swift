@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(DataEntryViewModel.self) var viewModel
-    @Environment(DatabaseUserData.self) var vmUserData
+    @State var database = DatabaseUserData()
 
     @State var location:CGPoint = CGPoint(x:0.35, y:0.14)
     @State var opacity:CGFloat = 0
@@ -32,7 +32,7 @@ struct ContentView: View {
             {
                 @Bindable var vm = viewModel
                 
-                DataEntry(cursorPos: $vm.cursorPos,refKeyPath:\DatabaseUserData.data,drafttext: $vm.drafttext,maxChars:10, savedtext: $vm.data)
+                DataEntry(database:database,cursorPos: $vm.cursorPos,refKeyPath:\DatabaseUserData.data,drafttext: $vm.drafttext,maxChars:10)
                 HStack{
                     
                     Button("VALIDATE", action: {
