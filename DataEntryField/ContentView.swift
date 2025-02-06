@@ -1,12 +1,15 @@
 import SwiftUI
+import Combine
+
+
+
 
 struct ContentView: View {
-    @Environment(DataEntryViewModel.self) var viewModel
-    @State var database = DatabaseUserData()
-
+    @State private var database = DatabaseUserData()
     @State var location:CGPoint = CGPoint(x:0.35, y:0.14)
     @State var opacity:CGFloat = 0
     @State var scale:CGFloat = 1.0
+    @State var dataEntryState: DataEntryStates = .UNUSED
     var body: some View {
         
         let locationConverterProxy = Binding<CGPoint>(
@@ -24,19 +27,18 @@ struct ContentView: View {
         ZStack{
             GeometryReader { geometry in
                 Image(systemName: "dot.scope").resizable().frame(width: 40.0+(35.0*scale), height: 40.0+(35.0*scale)).opacity(0.6+(Double(opacity)*0.3)).position(convertLocation(geometry.size.width, geometry.size.height))
-                    .foregroundColor(.red)
+                    .foregroundColor(Color.red.opacity(dataEntryState == .UNUSED ? 0.6+(Double(opacity)*0.3) : 0.0))
             }
             .zIndex(10)
             
             VStack
             {
-                @Bindable var vm = viewModel
                 
-                DataEntry(database:database,cursorPos: $vm.cursorPos,refKeyPath:\DatabaseUserData.data,drafttext: $vm.drafttext,maxChars:10)
+                DataEntry(dataEntryState:$dataEntryState,database:database,refKeyPath:\DatabaseUserData.data,maxChars:10)
                 HStack{
                     
                     Button("VALIDATE", action: {
-                        viewModel.Keyreceived(key: "VALIDATE")
+                        KeyboardEventBus.shared.keyTapped.send("VALIDATE")
                     }
                     )
                     .padding()
@@ -46,7 +48,7 @@ struct ContentView: View {
                     )
                     
                     Button("ESC", action: {
-                        viewModel.Keyreceived(key: "ESC")
+                        KeyboardEventBus.shared.keyTapped.send("ESC")
                     }
                     )
                     .padding()
@@ -59,7 +61,7 @@ struct ContentView: View {
                 HStack{
 
                 Button(action: {
-                    viewModel.Keyreceived(key: "<-")
+                    KeyboardEventBus.shared.keyTapped.send("<-")
                 }) {
                     Image(systemName: "arrowshape.left.fill") // Use SF Symbol
                         .font(.largeTitle)       // Adjust font size
@@ -67,7 +69,7 @@ struct ContentView: View {
                 }
                 
                 Button(action: {
-                    viewModel.Keyreceived(key: "->")
+                    KeyboardEventBus.shared.keyTapped.send("->")
                 }) {
                     Image(systemName: "arrowshape.right.fill") // Use SF Symbol
                         .font(.largeTitle)       // Adjust font size
@@ -75,8 +77,8 @@ struct ContentView: View {
                 }
                 
                 Button(action: {
-                    viewModel.Keyreceived(key: "DEL")
-                    
+                    KeyboardEventBus.shared.keyTapped.send("DEL")
+
                     //                    viewModel.drafttext = String(viewModel.drafttext.dropLast())
                     
                 }) {
@@ -90,26 +92,23 @@ struct ContentView: View {
                 
                 HStack{
                     Button(action: {
-                        print("Button pressed")
-                        viewModel.Keyreceived(key: "A")
+                        KeyboardEventBus.shared.keyTapped.send("A")
                     }) {
                         Image(systemName: "a.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size
                             .foregroundColor(.blue)  // Change color
                     }
                     Button(action: {
-                        print("Button pressed")
-                        viewModel.Keyreceived(key: "B")
-                        
+                        KeyboardEventBus.shared.keyTapped.send("B")
+
                     }) {
                         Image(systemName: "b.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size
                             .foregroundColor(.blue)  // Change color
                     }
                     Button(action: {
-                        print("Button pressed")
-                        viewModel.Keyreceived(key: "C")
-                        
+                        KeyboardEventBus.shared.keyTapped.send("C")
+
                     }) {
                         Image(systemName: "c.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size
@@ -117,8 +116,8 @@ struct ContentView: View {
                     }
                     Button(action: {
                         print("Button pressed")
-                        viewModel.Keyreceived(key: "1")
-                        
+                        KeyboardEventBus.shared.keyTapped.send("1")
+
                     }) {
                         Image(systemName: "1.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size
@@ -126,8 +125,8 @@ struct ContentView: View {
                     }
                     Button(action: {
                         print("Button pressed")
-                        viewModel.Keyreceived(key: "+-")
-                        
+                        KeyboardEventBus.shared.keyTapped.send("+-")
+
                     }) {
                         Image(systemName: "plusminus.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size

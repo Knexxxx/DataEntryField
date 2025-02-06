@@ -1,16 +1,17 @@
 import SwiftUI
 
 struct DataEntry: View {
+    @Binding var dataEntryState: DataEntryStates
     @Bindable var database: DatabaseUserData
+    // @State var vm = DataEntryViewModel()
     // The editing view model (still injected via the environment).
-    @Environment(DataEntryViewModel.self) var viewModel
     // The external database model that holds the saved text.
     
     @State private var isVisible = true // Toggle for blinking
-    @Binding var cursorPos: Int
+    @State var cursorPos: Int = 0
     /// The key path to the property on DatabaseUserData that contains the saved text.
     let refKeyPath: ReferenceWritableKeyPath<DatabaseUserData, String>
-    @Binding var drafttext: String
+    @State var drafttext: String = ""
     let maxChars: Int
     @State private var blinkingTask: Task<Void, Never>? // For managing the blinking animation
     
@@ -24,33 +25,102 @@ struct DataEntry: View {
     }
     
     var strokeColor: Color {
-        switch viewModel.dataEntryState {
+        switch dataEntryState {
         case .UNUSED:    return .green
         case .EDIT:      return .red
         case .HIGHLIGHT: return .yellow
         }
     }
     
+    func processKeyboard(key: String) {
+        
+        if key.count > 1
+        {
+            SpecialKey(key: key)
+            return
+        }
+        if dataEntryState != .EDIT
+        {
+            drafttext = ""
+            dataEntryState = .EDIT
+        }
+        if maxChars > drafttext.count
+        {
+            drafttext += key
+            cursorPos += 1
+        }
+    }
+    
+        
+    func SpecialKey(key: String) {
+        guard dataEntryState != .UNUSED || key == "DEL" else { return }
+
+        switch key {
+        case "VALIDATE":
+            print("VALIDATED")
+            database.data = drafttext
+            print("Saved to DatabaseUserData: \(drafttext)")
+            dataEntryState = .UNUSED
+            
+        case "ESC":
+            print("ESCAPED")
+            drafttext = ""
+            dataEntryState = .UNUSED
+            
+        case "+-":
+            print("+-")
+            if drafttext.hasSuffix("+") {
+                drafttext.removeLast()
+                cursorPos -= 1
+                processKeyboard(key: "-")
+            }
+            else { processKeyboard(key: "+")}
+
+
+        case "<-" where cursorPos > 0:
+            cursorPos -= 1
+
+        case "->" where cursorPos < drafttext.count:
+            cursorPos += 1
+
+        case "DEL":
+            dataEntryState = .EDIT
+            drafttext = ""
+            cursorPos = 0
+
+        default:
+            break
+        }
+    }
+
+        
+        
+        
+        
+        
+        
+    
+    
+    
     var body: some View {
         // Use @Bindable to automatically update when viewModel changes.
-        @Bindable var vm = viewModel
         HStack {
-            ZStack(alignment: vm.dataEntryState == .EDIT ? .leading : .center) {
+            ZStack(alignment: dataEntryState == .EDIT ? .leading : .center) {
                 // Display content depending on the editing state.
-                if vm.dataEntryState == .UNUSED {
+                if dataEntryState == .UNUSED {
                     // Display the saved text from the database (via the key path).
                     Text(savedText)
                         .lineLimit(1)
                         .foregroundColor(.cyan)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .cornerRadius(2)
-                } else if vm.dataEntryState == .HIGHLIGHT {
+                } else if dataEntryState == .HIGHLIGHT {
                     Text(highlight(text: drafttext))
                         .lineLimit(1)
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .cornerRadius(2)
-                } else if vm.dataEntryState == .EDIT {
+                } else if dataEntryState == .EDIT {
                     // Display the draft text and a blinking cursor.
                     Text(drafttext)
                         .lineLimit(1)
@@ -62,7 +132,7 @@ struct DataEntry: View {
                         .onAppear {
                             cursorPos = drafttext.count
                             print("Enabling blinking task at \(cursorPos)")
-                            viewModel.GetMaxChars(_maxchar: maxChars)
+//                            vm.GetMaxChars(_maxchar: maxChars)
                             blinkingTask?.cancel() // Cancel any existing task.
                             blinkingTask = Task {
                                 while !Task.isCancelled {
@@ -79,6 +149,10 @@ struct DataEntry: View {
                         }
                 }
             }
+            .onReceive(KeyboardEventBus.shared.keyTapped) { key in
+                processKeyboard(key:key) // Append received key
+                print("Received key: \(key)")
+            }
         }
         .frame(width: 150, height: 50)
         .background(Color.black)
@@ -88,7 +162,7 @@ struct DataEntry: View {
                 .stroke(strokeColor, lineWidth: 2)
         )
         .onTapGesture {
-            viewModel.tapReceived()
+//            vm.tapReceived()
         }
     }
 }
@@ -124,7 +198,7 @@ private func highlight(text: String) -> AttributedString {
 //    @State private static var drafttext = "Draft text"
 //    @State private static var cursorPos = 0
 //    @StateObject private static var databaseUserData = DatabaseUserData()
-//    
+//
 //    static var previews: some View {
 //        DataEntry(
 //            cursorPos: $cursorPos,

@@ -3,7 +3,6 @@ import Observation
 
 @Observable
 class DatabaseUserData {
-    var data: String = "AB2" // Example property
-
+    var data: String = "AB2"
 }
-
+    
