@@ -1,12 +1,12 @@
 import SwiftUI
 import Observation
 
-@Observable
-class ViewModelDataEntry {
-    var data: String = "AB1" // Example property
-    var drafttext: String = "" // Example property
-    var dataEntryState: DataEntryStates = .UNUSED
-    var cursorPos: Int = 0
+
+class ViewModelUserData: ObservableObject {
+    @Published var data: String = "AB1" // Example property
+    @Published var drafttext: String = "" // Example property
+    @Published var dataEntryState: DataEntryStates = .UNUSED
+    @Published var cursorPos: Int = 0
 //    @Published var location: CGPoint = CGPoint()
     var maxChar: Int = 4
     

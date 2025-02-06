@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DataEntry: View {
-    @EnvironmentObject var viewModel: ViewModelDataEntry
+    @Environment(ViewModelDataEntry.self) var viewModel
     @State private var isVisible = true // Toggle for blinking
     @Binding var cursorPos: Int
     @Binding var drafttext: String
@@ -125,7 +125,7 @@ private func highlight(text: String) -> AttributedString {
 
 // MARK: - Preview
 struct DataEntry_Previews: PreviewProvider {
-    @StateObject private static var viewModel = ViewModelDataEntry()
+    @State private static var viewModel = ViewModelDataEntry()
     @State private static var draftText = "DraftText"
     @State private static var savedText = "SavedText"
     @State private static var state = DataEntryStates.UNUSED
@@ -138,6 +138,6 @@ struct DataEntry_Previews: PreviewProvider {
             savedtext: $savedText,
             dataEntryState: $state
         )
-        .environmentObject(viewModel)
+        .environment(viewModel)
     }
 }
