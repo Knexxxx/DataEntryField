@@ -23,7 +23,7 @@ struct ContentView: View {
         
         ZStack{
             GeometryReader { geometry in
-                Image(systemName: "dot.scope").resizable().frame(width: 20.0+(20.0*scale), height: 20.0+(20.0*scale)).opacity(0.6+(Double(opacity)*0.3)).position(convertLocation(geometry.size.width, geometry.size.height))
+                Image(systemName: "dot.scope").resizable().frame(width: 40.0+(35.0*scale), height: 40.0+(35.0*scale)).opacity(0.6+(Double(opacity)*0.3)).position(convertLocation(geometry.size.width, geometry.size.height))
                     .foregroundColor(.red)
             }
             .zIndex(10)
@@ -34,32 +34,6 @@ struct ContentView: View {
                 
                 DataEntry(cursorPos: $vm.cursorPos,refKeyPath:\DatabaseUserData.data,drafttext: $vm.drafttext,maxChars:10, savedtext: $vm.data)
                 HStack{
-                    Button(action: {
-                        viewModel.Keyreceived(key: "<-")
-                    }) {
-                        Image(systemName: "arrowshape.left.fill") // Use SF Symbol
-                            .font(.largeTitle)       // Adjust font size
-                            .foregroundColor(.blue)  // Change color
-                    }
-                    
-                    Button(action: {
-                        viewModel.Keyreceived(key: "->")
-                    }) {
-                        Image(systemName: "arrowshape.right.fill") // Use SF Symbol
-                            .font(.largeTitle)       // Adjust font size
-                            .foregroundColor(.blue)  // Change color
-                    }
-                    
-                    Button(action: {
-                        viewModel.Keyreceived(key: "DEL")
-                        
-                        //                    viewModel.drafttext = String(viewModel.drafttext.dropLast())
-                        
-                    }) {
-                        Image(systemName: "delete.backward.fill") // Use SF Symbol
-                            .font(.largeTitle)       // Adjust font size
-                            .foregroundColor(.blue)  // Change color
-                    }
                     
                     Button("VALIDATE", action: {
                         viewModel.Keyreceived(key: "VALIDATE")
@@ -81,6 +55,37 @@ struct ContentView: View {
                             .stroke(Color.red, lineWidth: 2)
                     )
                 }
+                
+                HStack{
+
+                Button(action: {
+                    viewModel.Keyreceived(key: "<-")
+                }) {
+                    Image(systemName: "arrowshape.left.fill") // Use SF Symbol
+                        .font(.largeTitle)       // Adjust font size
+                        .foregroundColor(.blue)  // Change color
+                }
+                
+                Button(action: {
+                    viewModel.Keyreceived(key: "->")
+                }) {
+                    Image(systemName: "arrowshape.right.fill") // Use SF Symbol
+                        .font(.largeTitle)       // Adjust font size
+                        .foregroundColor(.blue)  // Change color
+                }
+                
+                Button(action: {
+                    viewModel.Keyreceived(key: "DEL")
+                    
+                    //                    viewModel.drafttext = String(viewModel.drafttext.dropLast())
+                    
+                }) {
+                    Image(systemName: "delete.backward.fill") // Use SF Symbol
+                        .font(.largeTitle)       // Adjust font size
+                        .foregroundColor(.blue)  // Change color
+                }
+                
+            }
                 
                 
                 HStack{
