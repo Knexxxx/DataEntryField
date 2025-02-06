@@ -1,18 +1,19 @@
 import SwiftUI
 
 struct DataEntry: View {
-    @Environment(ViewModelDataEntry.self) var viewModel
+    @Environment(DataEntryViewModel.self) var viewModel
     @State private var isVisible = true // Toggle for blinking
     @Binding var cursorPos: Int
+    let refKeyPath: ReferenceWritableKeyPath<ViewModelUserData, String>
     @Binding var drafttext: String
+//    @State private var drafttextlocal: String = ""
     let maxChars: Int
     @Binding var savedtext: String
-    @Binding var dataEntryState: DataEntryStates
     @State private var blinkingTask: Task<Void, Never>? // Store the blinking task
     
     
     var strokeColor: Color {
-        switch dataEntryState {
+        switch viewModel.dataEntryState {
         case .UNUSED:
             return .green
         case .EDIT:
@@ -23,24 +24,25 @@ struct DataEntry: View {
     }
     
     var body: some View {
+        @Bindable var vm = viewModel
         HStack {
-            ZStack(alignment: dataEntryState == .EDIT ? .leading : .center) {
+            ZStack(alignment: vm.dataEntryState == .EDIT ? .leading : .center) {
                 // Background and state-dependent text
-                if dataEntryState == .UNUSED {
+                if vm.dataEntryState == .UNUSED {
                     Text(savedtext)
                         .lineLimit(1) // Prevents line wrapping
                         .foregroundColor(.cyan) // Text color
                         .frame(maxWidth: .infinity, alignment: .center) // Centered text
 //                        .background(Color.green.opacity(0.3)) // Outer background
                         .cornerRadius(2)
-                } else if dataEntryState == .HIGHLIGHT {
+                } else if vm.dataEntryState == .HIGHLIGHT {
                     Text(highlight(text: drafttext))
                         .lineLimit(1) // Prevents line wrapping
                         .foregroundColor(.black) // Text color
                         .frame(maxWidth: .infinity, alignment: .center) // Align text to the left
                     //                        .background(Color.cyan)
                         .cornerRadius(2)
-                } else if dataEntryState == .EDIT {
+                } else if vm.dataEntryState == .EDIT {
                     Text(drafttext)
                         .lineLimit(1) // Prevents line wrapping
                         .frame(maxWidth: .infinity, alignment: .leading) // Align cursor text to the left
@@ -125,19 +127,19 @@ private func highlight(text: String) -> AttributedString {
 
 // MARK: - Preview
 struct DataEntry_Previews: PreviewProvider {
-    @State private static var viewModel = ViewModelDataEntry()
-    @State private static var draftText = "DraftText"
+    @State private static var viewModel = DataEntryViewModel()
+    @Binding var drafttext: String
     @State private static var savedText = "SavedText"
     @State private static var state = DataEntryStates.UNUSED
     
     static var previews: some View {
         DataEntry(
             cursorPos: $viewModel.cursorPos,
-            drafttext: $draftText,
+            refKeyPath: \ViewModelUserData.data,
+            drafttext: $savedText,
             maxChars: 20,
-            savedtext: $savedText,
-            dataEntryState: $state
-        )
+            savedtext: $savedText        )
         .environment(viewModel)
+
     }
 }

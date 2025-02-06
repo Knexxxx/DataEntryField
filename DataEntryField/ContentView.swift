@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(ViewModelDataEntry.self) var viewModel
+    @Environment(DataEntryViewModel.self) var viewModel
+    @Environment(ViewModelUserData.self) var vmUserData
+
     @State var location:CGPoint = CGPoint(x:0.35, y:0.14)
     @State var opacity:CGFloat = 0
     @State var scale:CGFloat = 1.0
@@ -30,7 +32,7 @@ struct ContentView: View {
             {
                 @Bindable var vm = viewModel
                 
-                DataEntry(cursorPos: $vm.cursorPos,drafttext: $vm.drafttext,maxChars:10, savedtext: $vm.data,dataEntryState: $vm.dataEntryState)
+                DataEntry(cursorPos: $vm.cursorPos,refKeyPath:\ViewModelUserData.data,drafttext: $vm.drafttext,maxChars:10, savedtext: $vm.data)
                 HStack{
                     Button(action: {
                         viewModel.Keyreceived(key: "<-")
@@ -114,6 +116,15 @@ struct ContentView: View {
                         
                     }) {
                         Image(systemName: "1.circle") // Use SF Symbol
+                            .font(.largeTitle)       // Adjust font size
+                            .foregroundColor(.blue)  // Change color
+                    }
+                    Button(action: {
+                        print("Button pressed")
+                        viewModel.Keyreceived(key: "+-")
+                        
+                    }) {
+                        Image(systemName: "plusminus.circle") // Use SF Symbol
                             .font(.largeTitle)       // Adjust font size
                             .foregroundColor(.blue)  // Change color
                     }

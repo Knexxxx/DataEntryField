@@ -2,7 +2,7 @@ import SwiftUI
 import Observation
 
 @Observable
-class ViewModelDataEntry {
+class DataEntryViewModel {
     var data: String = "AB1" // Example property
     var drafttext: String = "" // Example property
     var dataEntryState: DataEntryStates = .UNUSED
