@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct DataEntryFieldApp: App {
     @State private var viewModel = DataEntryViewModel()
-    @State private var vmUserData = ViewModelUserData()
+    @State private var vmUserData = DatabaseUserData()
     var body: some Scene {
         WindowGroup {
             ContentView()

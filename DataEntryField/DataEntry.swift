@@ -4,7 +4,7 @@ struct DataEntry: View {
     @Environment(DataEntryViewModel.self) var viewModel
     @State private var isVisible = true // Toggle for blinking
     @Binding var cursorPos: Int
-    let refKeyPath: ReferenceWritableKeyPath<ViewModelUserData, String>
+    let refKeyPath: ReferenceWritableKeyPath<DatabaseUserData, String>
     @Binding var drafttext: String
 //    @State private var drafttextlocal: String = ""
     let maxChars: Int
@@ -135,7 +135,7 @@ struct DataEntry_Previews: PreviewProvider {
     static var previews: some View {
         DataEntry(
             cursorPos: $viewModel.cursorPos,
-            refKeyPath: \ViewModelUserData.data,
+            refKeyPath: \DatabaseUserData.data,
             drafttext: $savedText,
             maxChars: 20,
             savedtext: $savedText        )
